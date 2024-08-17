@@ -1,0 +1,46 @@
+linters:
+  disable-all: true
+  enable:
+    # default linters
+    - errcheck # find unchecked errors
+    - gosimple # find simpler ways to write code
+    - govet # find suspicious constructs, general linter
+    - ineffassign # find variable assignments that do nothing
+    - staticcheck # find suspicious constructs, general linter
+    - unused # find unused constants, variables, function, and types
+    
+    # extra linters
+    - goconst # find repeated strings that could be a constant
+    - gocritic # find suspicious constructs, general linter
+    - gocyclo # find high cyclomatic complexity code
+    - godox # find TODOs and FIXMEs
+    - gofmt # find code with incorrect go format
+    - gosec # find security problems
+    - lll # find lines that are too long
+    - maintidx # find high maintainability code
+    - misspell # find spelling mistakes
+    - nakedret # find naked returns
+    - nestif # find deeply nested if statements
+    - nilnil # find nil values returns that also have nil error returns
+    - revive # find suspicious constructs, general linter
+    - unconvert # find unnecessary type conversions
+    - unparam # find unused function parameters
+
+linters-settings:
+  gocyclo:
+    min-complexity: 10
+
+  lll:
+    line-length: 120
+
+  maintidx:
+    under: 20
+
+  misspell:
+    locale: UK
+    ignore-words:
+      - example
+
+  nakedret:
+    max-func-lines: 1
+    
