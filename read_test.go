@@ -282,7 +282,7 @@ func TestReadTagLongPayload(t *testing.T) {
 
 func TestReadTagFloatPayload(t *testing.T) {
 	var order binary.ByteOrder = binary.LittleEndian
-	
+
 	// success cases
 	wantFloats := []float32{
 		0.0, 1.23, math.Pi, -4.5e+6, math.SmallestNonzeroFloat32, math.MaxFloat32,
@@ -362,7 +362,7 @@ func TestReadTagFloatPayload(t *testing.T) {
 
 func TestReadTagDoublePayload(t *testing.T) {
 	var order binary.ByteOrder = binary.LittleEndian
-	
+
 	// success cases
 	wantDoubles := []float64{
 		0.0, 1.23, math.Pi, -4.5e+6, math.SmallestNonzeroFloat64, math.MaxFloat64,
@@ -441,7 +441,7 @@ func TestReadTagDoublePayload(t *testing.T) {
 
 func TestReadTagByteArrayPayload(t *testing.T) {
 	var order binary.ByteOrder = binary.LittleEndian
-	
+
 	// success cases
 	t.Run("Test typical byte array", func(t *testing.T) {
 		wantByteArray := []byte{0, 255, 1, 50, 48, 0, 0, 74}
@@ -524,7 +524,7 @@ func TestReadTagByteArrayPayload(t *testing.T) {
 
 func TestReadTagStringPayload(t *testing.T) {
 	var order binary.ByteOrder = binary.LittleEndian
-	
+
 	// success cases
 	t.Run("Test typical string", func(t *testing.T) {
 		wantString := "Dummy string used for testing the TagString payload read"
@@ -590,7 +590,7 @@ func TestReadTagStringPayload(t *testing.T) {
 
 func TestReadTagListPayload(t *testing.T) {
 	var order binary.ByteOrder = binary.LittleEndian
-	
+
 	// success cases
 	t.Run("Test typical tag list", func(t *testing.T) {
 		buffer := bytes.NewBuffer([]byte{tagInt})
