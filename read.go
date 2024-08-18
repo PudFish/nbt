@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"unicode/utf8"
 )
 
 // ReadTag reads the next tags worth of bytes on the buffer, undertakes basic structure checks,
@@ -39,7 +40,7 @@ func ReadTag(buffer io.Reader, order binary.ByteOrder) (tag map[string]any, err 
 
 // readTagID is intended to read the ID of a tag. The ID is the first byte in a tag. The tag ID is also known as the tag
 // type. In this implementation, tag ID refers to the uint8 number (0 -> 12), and tag Type refers to the type name
-// associated with that ID (0 <--> tagEnd, 12 <--> tagLongArray).
+// associated with that ID (ID 0 == type tagEnd, ID 12 == type tagLongArray).
 func readTagID(buffer io.Reader, order binary.ByteOrder) (id uint8, err error) {
 	err = binary.Read(buffer, order, &id)
 	if err != nil {
@@ -107,7 +108,7 @@ func readTagPayload(buffer io.Reader, order binary.ByteOrder, tagID uint8) (payl
 	case tagLongArray:
 		payload, err = readTagLongArrayPayload(buffer, order)
 	default:
-		err = fmt.Errorf("tagList type %v not between 0 (tagEnd) and 12 (tagLongArray)", tagID)
+		err = fmt.Errorf("tagList ID %v not between 0 (tagEnd) and 12 (tagLongArray)", tagID)
 	}
 	return payload, err
 }
@@ -216,6 +217,10 @@ func readTagStringPayload(buffer io.Reader, order binary.ByteOrder) (payload str
 		return "", fmt.Errorf("Unable to read tagString payload: %w", err)
 	}
 	payload = string(stringPayloadBytes)
+
+	if !utf8.ValidString(payload) {
+		return "", fmt.Errorf("Unable to read tagString payload: \"%v\" contains non UTF-8 charters", payload)
+	}
 
 	return payload, nil
 }

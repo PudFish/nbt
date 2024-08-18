@@ -527,7 +527,7 @@ func TestReadTagStringPayload(t *testing.T) {
 
 	// success cases
 	t.Run("Test typical string", func(t *testing.T) {
-		wantString := "Dummy string used for testing the TagString payload read"
+		wantString := "Dummy string used for testing the TagString payload read, 你好世界"
 		size := uint16(len(wantString))
 
 		b := make([]byte, 2)
@@ -563,6 +563,21 @@ func TestReadTagStringPayload(t *testing.T) {
 	})
 
 	// failure cases
+	t.Run("Check handling of non-UTF-8 characters", func(t *testing.T) {
+		// 0xc0 and 0xff are invalid
+		var nonUTF8String = []byte{0x41, 0xc0, 0xff, 0x61}
+
+		b := make([]byte, 2)
+		binary.LittleEndian.PutUint16(b, uint16(len(nonUTF8String)))
+		buffer := bytes.NewBuffer(b)
+		buffer.Write(nonUTF8String)
+
+		_, gotErr := readTagStringPayload(buffer, order)
+		if gotErr == nil {
+			t.Errorf("got %v, want non-nil", gotErr)
+		}
+	})
+
 	t.Run("Check handling of empty buffer", func(t *testing.T) {
 		errBuffer := iotest.ErrReader(fmt.Errorf(""))
 		_, gotErr := readTagStringPayload(errBuffer, order)
