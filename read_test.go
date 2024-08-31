@@ -604,7 +604,7 @@ func TestReadTagListPayload(t *testing.T) {
 		wantList := []int32{0, 1, 128, -4}
 
 		b := make([]byte, 4)
-		binary.LittleEndian.PutUint32(b, uint32(len(wantList)))
+		binary.LittleEndian.PutUint32(b, 4)
 		buffer.Write(b)
 
 		for _, wantInt := range wantList {
@@ -628,10 +628,8 @@ func TestReadTagListPayload(t *testing.T) {
 	t.Run("Test empty tag list", func(t *testing.T) {
 		buffer := bytes.NewBuffer([]byte{tagString})
 
-		wantList := []string{}
-
 		b := make([]byte, 4)
-		binary.LittleEndian.PutUint32(b, uint32(len(wantList)))
+		binary.LittleEndian.PutUint32(b, 4)
 		buffer.Write(b)
 
 		gotList, gotErr := readTagListPayload(buffer, order)
@@ -664,10 +662,8 @@ func TestReadTagListPayload(t *testing.T) {
 	t.Run("Check handling of partial buffer", func(t *testing.T) {
 		buffer := bytes.NewBuffer([]byte{tagInt})
 
-		wantList := []int32{0, 1, 128, -4}
-
 		b := make([]byte, 4)
-		binary.LittleEndian.PutUint32(b, uint32(len(wantList)))
+		binary.LittleEndian.PutUint32(b, 4)
 		buffer.Write(b)
 		// Do not write the list
 
