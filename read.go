@@ -282,6 +282,10 @@ func readTagIntArrayPayload(buffer io.Reader, order binary.ByteOrder) (payload [
 		return nil, fmt.Errorf("Unable to read tagIntArray payload size: %w", err)
 	}
 
+	if size < 0 {
+		return nil, fmt.Errorf("Unable to read tagIntArray payload size: size %v is negative", size)
+	}
+
 	for i := 0; i < int(size); i++ {
 		var p int32
 		err = binary.Read(buffer, order, &p)
@@ -302,6 +306,10 @@ func readTagLongArrayPayload(buffer io.Reader, order binary.ByteOrder) (payload 
 	err = binary.Read(buffer, order, &size)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to read tagLongArray payload size: %w", err)
+	}
+
+	if size < 0 {
+		return nil, fmt.Errorf("Unable to read tagLongArray payload size: size %v is negative", size)
 	}
 
 	for i := 0; i < int(size); i++ {
