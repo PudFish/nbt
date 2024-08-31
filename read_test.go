@@ -603,9 +603,145 @@ func TestReadTagCompoundPayload(t *testing.T) {
 }
 
 func TestReadTagIntArrayPayload(t *testing.T) {
-	_ = t
+	successCases := []struct {
+		name         string
+		wantIntArray []int32
+		order        binary.ByteOrder
+		input        []byte
+	}{
+		{"empty int array", []int32{}, binary.LittleEndian, []byte{0x00, 0x00, 0x00, 0x00}},
+		{"single int array", []int32{1234567}, binary.LittleEndian, []byte{0x01, 0x00, 0x00, 0x00, 0x87, 0xD6, 0x12,
+			0x00}},
+		{"typical int array", []int32{0, 1234567, 1, 2147483647, -89012345, 0, 0, 74},
+			binary.LittleEndian, []byte{0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87, 0xD6, 0x12, 0x00, 0x01,
+				0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x7F, 0x87, 0xC7, 0xB1, 0xFA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x4A, 0x00, 0x00, 0x00}},
+	}
+	for _, successCase := range successCases {
+		t.Run("Test success case: "+successCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(successCase.input)
+			gotIntArray, gotErr := readTagIntArrayPayload(buffer, successCase.order)
+
+			gotLength := len(gotIntArray)
+			wantLength := (len(successCase.input) - 4) / 4
+			if gotLength != wantLength {
+				t.Errorf("got length=%v, want length=%v", gotLength, wantLength)
+			}
+
+			for i, gotInt := range gotIntArray {
+				if gotInt != successCase.wantIntArray[i] {
+					t.Errorf("got %v, want %v, i=%v", gotInt, successCase.wantIntArray[i], i)
+				}
+			}
+
+			if gotErr != nil {
+				t.Errorf("got %v, want nil", gotErr)
+			}
+		})
+	}
+
+	failureCases := []struct {
+		name  string
+		order binary.ByteOrder
+		input []byte
+	}{
+		{"empty buffer", binary.LittleEndian, []byte{}},
+		{"partial size", binary.LittleEndian, []byte{0x01, 0x00, 0x00}},
+		{"partial int", binary.LittleEndian, []byte{0x01, 0x00, 0x00, 0x01, 0x01, 0x02, 0x03}},
+		{"empty array with non-zero size", binary.LittleEndian, []byte{0x08, 0x00, 0x00, 0x00}},
+		{"typical array with incorrect larger size", binary.LittleEndian, []byte{0x04, 0x00, 0x00, 0x00, 0x01, 0x00,
+			0x00, 0x00, 0x12, 0x23, 0x00, 0x56, 0x14, 0x1A, 0x99, 0xBE}},
+		{"negative size array", binary.LittleEndian, []byte{0xFD, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F}},
+	}
+	for _, failureCase := range failureCases {
+		t.Run("Test failure case: "+failureCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(failureCase.input)
+			_, gotErr := readTagIntArrayPayload(buffer, failureCase.order)
+			if gotErr == nil {
+				t.Errorf("got nil, want non-nil")
+			}
+		})
+	}
+
+	t.Run("Test failure case: broken io.Reader", func(t *testing.T) {
+		errBuffer := iotest.ErrReader(fmt.Errorf("mock broken io.reader"))
+		_, gotErr := readTagIntArrayPayload(errBuffer, binary.LittleEndian)
+		if gotErr == nil {
+			t.Errorf("got nil, want non-nil")
+		}
+	})
 }
 
 func TestReadTagLongArrayPayload(t *testing.T) {
-	_ = t
+	successCases := []struct {
+		name          string
+		wantLongArray []int64
+		order         binary.ByteOrder
+		input         []byte
+	}{
+		{"empty long array", []int64{}, binary.LittleEndian, []byte{0x00, 0x00, 0x00, 0x00}},
+		{"single long array", []int64{123456789012}, binary.LittleEndian, []byte{0x01, 0x00, 0x00, 0x00, 0x14, 0x1A,
+			0x99, 0xBE, 0x1C, 0x00, 0x00, 0x00}},
+		{"typical long array", []int64{0, 123456789012, 1, 9223372036854775807, -345678901234, 0, 0, 74},
+			binary.LittleEndian, []byte{0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14,
+				0x1A, 0x99, 0xBE, 0x1C, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x0E, 0x90, 0xEE, 0x83, 0xAF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4A, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00}},
+	}
+	for _, successCase := range successCases {
+		t.Run("Test success case: "+successCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(successCase.input)
+			gotLongArray, gotErr := readTagLongArrayPayload(buffer, successCase.order)
+
+			gotLength := len(gotLongArray)
+			wantLength := (len(successCase.input) - 4) / 8
+			if gotLength != wantLength {
+				t.Errorf("got length=%v, want length=%v", gotLength, wantLength)
+			}
+
+			for i, gotLong := range gotLongArray {
+				if gotLong != successCase.wantLongArray[i] {
+					t.Errorf("got %v, want %v, i=%v", gotLong, successCase.wantLongArray[i], i)
+				}
+			}
+
+			if gotErr != nil {
+				t.Errorf("got %v, want nil", gotErr)
+			}
+		})
+	}
+
+	failureCases := []struct {
+		name  string
+		order binary.ByteOrder
+		input []byte
+	}{
+		{"empty buffer", binary.LittleEndian, []byte{}},
+		{"partial size", binary.LittleEndian, []byte{0x01, 0x00, 0x00}},
+		{"partial long", binary.LittleEndian, []byte{0x01, 0x00, 0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}},
+		{"empty array with non-zero size", binary.LittleEndian, []byte{0x08, 0x00, 0x00, 0x00}},
+		{"typical array with incorrect larger size", binary.LittleEndian, []byte{0x04, 0x00, 0x00, 0x00, 0x01, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x23, 0x00, 0x56, 0x00, 0x00, 0x00, 0x00, 0x14, 0x1A, 0x99, 0xBE,
+			0x1C, 0x00, 0x00, 0x00}},
+		{"negative size array", binary.LittleEndian, []byte{0xFD, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0x7F}},
+	}
+	for _, failureCase := range failureCases {
+		t.Run("Test failure case: "+failureCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(failureCase.input)
+			_, gotErr := readTagLongArrayPayload(buffer, failureCase.order)
+			if gotErr == nil {
+				t.Errorf("got nil, want non-nil")
+			}
+		})
+	}
+
+	t.Run("Test failure case: broken io.Reader", func(t *testing.T) {
+		errBuffer := iotest.ErrReader(fmt.Errorf("mock broken io.reader"))
+		_, gotErr := readTagLongArrayPayload(errBuffer, binary.LittleEndian)
+		if gotErr == nil {
+			t.Errorf("got nil, want non-nil")
+		}
+	})
 }
