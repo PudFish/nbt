@@ -73,6 +73,10 @@ func readTagName(buffer io.Reader, order binary.ByteOrder) (name string, err err
 
 	name = string(nameBytes)
 
+	if !utf8.ValidString(name) {
+		return "", fmt.Errorf("Unable to read tag name: \"%v\" contains non UTF-8 charters", name)
+	}
+
 	return name, nil
 }
 
