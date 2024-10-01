@@ -20,11 +20,6 @@ const (
 	tagLongArray uint8 = 12
 )
 
-// globalByteOrder set the endian'ness for all the binary functions to allow it to be modified easily. In minecraft Java
-// edition, all numbers are encoded in big-endian. In Minecraft Bedrock edition, all numbers are encoded in
-// little-endian.
-// var globalByteOrder binary.ByteOrder = binary.LittleEndian
-
 // tag is the custom type to hold common information of each tag type, with a generic payload capacity. Most tag
 // payloads are the expected type.
 // tagEnd: N/A, no payload
