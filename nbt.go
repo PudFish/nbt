@@ -20,7 +20,7 @@ const (
 	tagLongArray uint8 = 12
 )
 
-// tag is the custom type to hold common information of each tag type, with a generic payload capacity. Most tag
+// Tag is the custom type to hold common information of each Tag type, with a generic payload capacity. Most Tag
 // payloads are the expected type.
 // tagEnd: N/A, no payload
 // tagByte: byte
@@ -32,17 +32,17 @@ const (
 // tagByteArray: []byte
 // tagString: string
 // tagList: []any, assumes the type of listed tags
-// tagCompound: []*tag, representing child tags an omitting the tagEnd
+// tagCompound: []*Tag, representing child tags an omitting the tagEnd
 // tagIntArray: []int32
 // tagLongArray: []int64
-type tag struct {
+type Tag struct {
 	id      uint8
 	name    string
 	payload any
 }
 
 // tagType returns the name associated with the tag ID
-func (t *tag) tagType() (tagType string, err error) {
+func (t *Tag) tagType() (tagType string, err error) {
 	switch t.id {
 	case tagEnd:
 		tagType = "tagEnd"

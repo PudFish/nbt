@@ -7,21 +7,21 @@ func TestTagType(t *testing.T) {
 	successCases := []struct {
 		name        string
 		wantTagType string
-		t           tag
+		t           Tag
 	}{
-		{"tagEnd (0)", "tagEnd", tag{0, "", nil}},
-		{"tagByte (1)", "tagByte", tag{1, "", nil}},
-		{"tagShort (2)", "tagShort", tag{2, "", nil}},
-		{"tagInt (3)", "tagInt", tag{3, "", nil}},
-		{"tagLong (4)", "tagLong", tag{4, "", nil}},
-		{"tagFloat (5)", "tagFloat", tag{5, "", nil}},
-		{"tagDouble (6)", "tagDouble", tag{6, "", nil}},
-		{"tagByteArray (7)", "tagByteArray", tag{7, "", nil}},
-		{"tagString (8)", "tagString", tag{8, "", nil}},
-		{"tagList (9)", "tagList", tag{9, "", nil}},
-		{"tagCompound (10)", "tagCompound", tag{10, "", nil}},
-		{"tagIntArray (11)", "tagIntArray", tag{11, "", nil}},
-		{"tagLongArray (12)", "tagLongArray", tag{12, "", nil}},
+		{"tagEnd (0)", "tagEnd", Tag{0, "", nil}},
+		{"tagByte (1)", "tagByte", Tag{1, "", nil}},
+		{"tagShort (2)", "tagShort", Tag{2, "", nil}},
+		{"tagInt (3)", "tagInt", Tag{3, "", nil}},
+		{"tagLong (4)", "tagLong", Tag{4, "", nil}},
+		{"tagFloat (5)", "tagFloat", Tag{5, "", nil}},
+		{"tagDouble (6)", "tagDouble", Tag{6, "", nil}},
+		{"tagByteArray (7)", "tagByteArray", Tag{7, "", nil}},
+		{"tagString (8)", "tagString", Tag{8, "", nil}},
+		{"tagList (9)", "tagList", Tag{9, "", nil}},
+		{"tagCompound (10)", "tagCompound", Tag{10, "", nil}},
+		{"tagIntArray (11)", "tagIntArray", Tag{11, "", nil}},
+		{"tagLongArray (12)", "tagLongArray", Tag{12, "", nil}},
 	}
 	for _, successCase := range successCases {
 		t.Run("Test success case: "+successCase.name, func(t *testing.T) {
@@ -36,7 +36,7 @@ func TestTagType(t *testing.T) {
 	}
 
 	t.Run("Test failure case: tag id out of range", func(t *testing.T) {
-		failTag := tag{13, "", nil}
+		failTag := Tag{13, "", nil}
 		_, gotErr := failTag.tagType()
 		if gotErr == nil {
 			t.Errorf("got nil, want non-nil")

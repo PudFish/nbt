@@ -170,51 +170,51 @@ func TestReadTag(t *testing.T) {
 		0x6F, 0x75, 0x6E, 0x74, 0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x0E, 0x00, 0x77, 0x6F, 0x72,
 		0x6C, 0x64, 0x5F, 0x70, 0x6F, 0x6C, 0x69, 0x63, 0x69, 0x65, 0x73, 0x00, 0x00, 0x00}
 
-		successCases := []struct {
-			name   string
-			order  binary.ByteOrder
-			input  []byte
-		}{
-			{"sample minecraft bedrock level.dat file (no header)", binary.LittleEndian, level},
-			{"tagEnd early exit", binary.LittleEndian, []byte{0x00}},
-		}
-		for _, successCase := range successCases {
-			t.Run("Test success case: "+successCase.name, func(t *testing.T) {
-				buffer := bytes.NewBuffer(successCase.input)
-				_, gotErr := ReadTag(buffer, successCase.order)
-				if gotErr != nil {
-					t.Errorf("got %v, want nil", gotErr)
-				}
-			})
-		}
+	successCases := []struct {
+		name  string
+		order binary.ByteOrder
+		input []byte
+	}{
+		{"sample minecraft bedrock level.dat file (no header)", binary.LittleEndian, level},
+		{"tagEnd early exit", binary.LittleEndian, []byte{0x00}},
+	}
+	for _, successCase := range successCases {
+		t.Run("Test success case: "+successCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(successCase.input)
+			_, gotErr := ReadTag(buffer, successCase.order)
+			if gotErr != nil {
+				t.Errorf("got %v, want nil", gotErr)
+			}
+		})
+	}
 
-		failureCases := []struct {
-			name  string
-			order binary.ByteOrder
-			input []byte
-		}{
-			{"empty tag name with non-zero length", binary.LittleEndian, []byte{0x02, 0x0D, 0x00}},
-			{"tag with no payload", binary.LittleEndian, []byte{0x08, 0x0D, 0x00, 0x42, 0x69, 0x6F, 0x6D, 0x65,	0x4F,
-				0x76, 0x65, 0x72, 0x72, 0x69, 0x64, 0x65,0x15, 0x00}},
-			{"empty buffer", binary.LittleEndian, []byte{}},
-		}
-		for _, failureCase := range failureCases {
-			t.Run("Test failure case: "+failureCase.name, func(t *testing.T) {
-				buffer := bytes.NewBuffer(failureCase.input)
-				_, gotErr := ReadTag(buffer, failureCase.order)
-				if gotErr == nil {
-					t.Errorf("got nil, want non-nil")
-				}
-			})
-		}
-	
-		t.Run("Test failure case: broken io.Reader", func(t *testing.T) {
-			errBuffer := iotest.ErrReader(fmt.Errorf("mock broken io.reader"))
-			_, gotErr := ReadTag(errBuffer, binary.LittleEndian)
+	failureCases := []struct {
+		name  string
+		order binary.ByteOrder
+		input []byte
+	}{
+		{"empty tag name with non-zero length", binary.LittleEndian, []byte{0x02, 0x0D, 0x00}},
+		{"tag with no payload", binary.LittleEndian, []byte{0x08, 0x0D, 0x00, 0x42, 0x69, 0x6F, 0x6D, 0x65, 0x4F,
+			0x76, 0x65, 0x72, 0x72, 0x69, 0x64, 0x65, 0x15, 0x00}},
+		{"empty buffer", binary.LittleEndian, []byte{}},
+	}
+	for _, failureCase := range failureCases {
+		t.Run("Test failure case: "+failureCase.name, func(t *testing.T) {
+			buffer := bytes.NewBuffer(failureCase.input)
+			_, gotErr := ReadTag(buffer, failureCase.order)
 			if gotErr == nil {
 				t.Errorf("got nil, want non-nil")
 			}
 		})
+	}
+
+	t.Run("Test failure case: broken io.Reader", func(t *testing.T) {
+		errBuffer := iotest.ErrReader(fmt.Errorf("mock broken io.reader"))
+		_, gotErr := ReadTag(errBuffer, binary.LittleEndian)
+		if gotErr == nil {
+			t.Errorf("got nil, want non-nil")
+		}
+	})
 }
 
 func TestReadTagID(t *testing.T) {
@@ -337,7 +337,7 @@ func TestReadTagPayload(t *testing.T) {
 	successCases := []struct {
 		name  string
 		order binary.ByteOrder
-		tagId uint8
+		tagID uint8
 		input []byte
 	}{
 		{"tagByte", binary.LittleEndian, tagByte, []byte{0x7B}},
@@ -358,7 +358,7 @@ func TestReadTagPayload(t *testing.T) {
 	for _, successCase := range successCases {
 		t.Run("Test success case: "+successCase.name, func(t *testing.T) {
 			buffer := bytes.NewBuffer(successCase.input)
-			_, gotErr := readTagPayload(buffer, successCase.order, successCase.tagId)
+			_, gotErr := readTagPayload(buffer, successCase.order, successCase.tagID)
 			if gotErr != nil {
 				t.Errorf("got %v, want nil", gotErr)
 			}
@@ -368,7 +368,7 @@ func TestReadTagPayload(t *testing.T) {
 	failureCases := []struct {
 		name  string
 		order binary.ByteOrder
-		tagId uint8
+		tagID uint8
 		input []byte
 	}{
 		{"tagEnd has no payload", binary.LittleEndian, tagEnd, []byte{}},
@@ -377,7 +377,7 @@ func TestReadTagPayload(t *testing.T) {
 	for _, failureCase := range failureCases {
 		t.Run("Test failure case: "+failureCase.name, func(t *testing.T) {
 			buffer := bytes.NewBuffer(failureCase.input)
-			_, gotErr := readTagPayload(buffer, failureCase.order, failureCase.tagId)
+			_, gotErr := readTagPayload(buffer, failureCase.order, failureCase.tagID)
 			if gotErr == nil {
 				t.Errorf("got nil, want non-nil")
 			}
