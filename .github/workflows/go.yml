@@ -15,7 +15,7 @@ jobs:
     - name: Set up Go environment
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22.4'
+        go-version: '1.23.1'
 
     - name: Compile package
       run: go build -v ./...
@@ -29,7 +29,7 @@ jobs:
     - name: Set up Go environment
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22.4'
+        go-version: '1.23.1'
 
     - name: Test with coverage
       run: go test -v ./... -coverprofile="coverage.out"
@@ -52,7 +52,7 @@ jobs:
       - name: Set up Go environment
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22.4'
+          go-version: '1.23.1'
         
       - name: Lint code
         uses: golangci/golangci-lint-action@v6
