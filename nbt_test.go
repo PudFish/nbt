@@ -5,9 +5,9 @@ import "testing"
 
 func TestTagType(t *testing.T) {
 	successCases := []struct {
-		name string
+		name        string
 		wantTagType string
-		t tag
+		t           tag
 	}{
 		{"tagEnd (0)", "tagEnd", tag{0, "", nil}},
 		{"tagByte (1)", "tagByte", tag{1, "", nil}},
