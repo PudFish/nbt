@@ -257,7 +257,7 @@ func readTagListPayload(buffer io.Reader, order binary.ByteOrder) (payload []any
 // readTagCompoundPayload reads a tag payload defined as: "Fully formed tags, followed by a tagEnd. A list of fully
 // formed tags, including their IDs, names, and payloads. No two tags may have the same name." The payload for a
 // compound is an array of pointers to child tags.
-func readTagCompoundPayload(buffer io.Reader, order binary.ByteOrder) (payload []*tag, err error) {
+func readTagCompoundPayload(buffer io.Reader, order binary.ByteOrder) (payload []tag, err error) {
 	for i := 0; ; i++ {
 		t, err := ReadTag(buffer, order)
 		if err != nil {
@@ -267,7 +267,7 @@ func readTagCompoundPayload(buffer io.Reader, order binary.ByteOrder) (payload [
 		if t.id == tagEnd {
 			break
 		}
-		payload = append(payload, &t)
+		payload = append(payload, t)
 	}
 	return payload, nil
 }
