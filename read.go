@@ -5,37 +5,33 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"maps"
 	"unicode/utf8"
 )
 
 // ReadTag reads the next tags worth of bytes on the buffer, undertakes basic structure checks,
-func ReadTag(buffer io.Reader, order binary.ByteOrder) (tag map[string]any, err error) {
-	tagID, err := readTagID(buffer, order)
+func ReadTag(buffer io.Reader, order binary.ByteOrder) (t tag, err error) {
+	t.id, err = readTagID(buffer, order)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read tag: %w", err)
+		return tag{}, fmt.Errorf("Unable to read tag: %w", err)
 	}
 
 	// tagEnd is used to mark the end of compound tags. This tag does not have a name, so it is only ever a single byte
-	// 0. It may also be the type of empty List tags. tag = nil at this point means tag is tagEnd
-	if tagID == tagEnd {
-		return tag, nil
+	// 0. It may also be the type of empty List tags.
+	if t.id == tagEnd {
+		return t, nil
 	}
 
-	tagName, err := readTagName(buffer, order)
+	t.name, err = readTagName(buffer, order)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read tag: %w", err)
+		return tag{}, fmt.Errorf("Unable to read tag: %w", err)
 	}
 
-	tagPayload, err := readTagPayload(buffer, order, tagID)
+	t.payload, err = readTagPayload(buffer, order, t.id)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read tag: %w", err)
+		return tag{}, fmt.Errorf("Unable to read tag: %w", err)
 	}
 
-	tag = make(map[string]any)
-	tag[tagName] = tagPayload
-
-	return tag, nil
+	return t, nil
 }
 
 // readTagID is intended to read the ID of a tag. The ID is the first byte in a tag. The tag ID is also known as the tag
@@ -112,7 +108,7 @@ func readTagPayload(buffer io.Reader, order binary.ByteOrder, tagID uint8) (payl
 	case tagLongArray:
 		payload, err = readTagLongArrayPayload(buffer, order)
 	default:
-		err = fmt.Errorf("tagList ID %v not between 0 (tagEnd) and 12 (tagLongArray)", tagID)
+		err = fmt.Errorf("tag ID %v not between 0 (tagEnd) and 12 (tagLongArray)", tagID)
 	}
 	return payload, err
 }
@@ -259,19 +255,19 @@ func readTagListPayload(buffer io.Reader, order binary.ByteOrder) (payload []any
 }
 
 // readTagCompoundPayload reads a tag payload defined as: "Fully formed tags, followed by a tagEnd. A list of fully
-// formed tags, including their IDs, names, and payloads. No two tags may have the same name."
-func readTagCompoundPayload(buffer io.Reader, order binary.ByteOrder) (payload map[string]any, err error) {
-	payload = make(map[string]any)
+// formed tags, including their IDs, names, and payloads. No two tags may have the same name." The payload for a
+// compound is an array of pointers to child tags.
+func readTagCompoundPayload(buffer io.Reader, order binary.ByteOrder) (payload []*tag, err error) {
 	for i := 0; ; i++ {
-		tag, err := ReadTag(buffer, order)
+		t, err := ReadTag(buffer, order)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to read tagCompound payload element %v: %w", i, err)
 		}
-		// nil tag is tagEnd
-		if tag == nil {
+
+		if t.id == tagEnd {
 			break
 		}
-		maps.Copy(payload, tag)
+		payload = append(payload, &t)
 	}
 	return payload, nil
 }
