@@ -30,3 +30,6 @@ go.work.sum
 # Test coverage files
 coverage.html
 coverage.out
+
+# local data
+level.dat
