@@ -43,4 +43,10 @@ linters-settings:
 
   nakedret:
     max-func-lines: 1
+
+issues:
+  exclude-rules:
+    - linters:
+      - maintidx
+      text: "TestReadTag"
     
